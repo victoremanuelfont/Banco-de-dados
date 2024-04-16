@@ -5,37 +5,28 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import db.DB;
-
-
+import db.DbIntegrityException;
 
 public class Program {
 
 	public static void main(String[] args) {
-		
+
 		Connection conn = null;
 		PreparedStatement st = null;
 		try {
 			conn = DB.getConnection();
-			st = conn.prepareStatement(
-					"UPDATE seller "
-					+ "SET BaseSalary = BaseSalary + ? " // ? valor a ser atribuido
-					+ "WHERE "
-					+ "(DepartmentId = ?)"// ? valor a ser atribuido
-					//Atualiza salario onde o department id for igual ao valor informado
-					);
-			st.setDouble(1,2000.00);
-			st.setInt(2,2);
+			st = conn.prepareStatement("DELETE FROM department " + "WHERE " + "Id = ?");
+
+			st.setInt(1, 4);
 			int rowsAffected = st.executeUpdate();
-			System.out.println("Qunatidade de linhas afetafas: "+ rowsAffected);
-		}
-		catch(SQLException e) {
-			e.printStackTrace();
-		}
-		finally {
+			System.out.println("Linhas alteradas: " + rowsAffected);
+		} catch (SQLException e) {
+			throw new DbIntegrityException(e.getLocalizedMessage());
+		} finally {
 			DB.closeStatement(st);
 			DB.closeConnection();
+
 		}
-		
 
 	}
 
