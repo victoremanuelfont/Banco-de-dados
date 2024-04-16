@@ -1,9 +1,10 @@
 package application;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import db.DB;
 
@@ -11,31 +12,33 @@ public class Program {
 
 	public static void main(String[] args) {
 
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		Connection conn = null;
-		Statement st = null; // faz uma consulta de todos os dados
-		ResultSet rs = null; // guarda o resultado da consulta anterior
-
+		PreparedStatement st = null;
 		try {
 			conn = DB.getConnection();
+			st = conn.prepareStatement("INSERT INTO seller " + "(Name, Email, BirthDate, BaseSalary, DepartmentId)"
+					+ "VALUES " + "(?, ?, ?, ?, ?)"); // place holder: lugar onde vou acrescentar os valores depois
 
-			st = conn.createStatement();
+			st.setString(1, "Miguel"); // substitui o primeiro '?' PELO NOME MIGUEL
+			st.setString(2, "Miguel@gmail.com");
+			st.setDate(3, new java.sql.Date(sdf.parse("22/01/2000").getTime()));
+			st.setDouble(4, 3000.00);
+			st.setInt(5, 4);
 
-			rs = st.executeQuery("select * from department");
-
-			// para percorrer o ResultSet
-			while (rs.next()) { // enquanto tiver o próximo
-				System.out.println(rs.getInt("Id") + ", " + rs.getString("Name"));
-			}
+			int rowsAffected = st.executeUpdate(); // execute para uma operação que vai ser alterado os dados
+													// O resultado é um numero inteiro indicando quantas linhas foram
+													// alteradas no banco de dados.
+			System.out.println("Linhas alteradas: " + rowsAffected);
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-
-		finally {
-
-			DB.closeResultSet(rs);
+		} catch (ParseException e) { // exceção para a data
+			e.printStackTrace();
+		} finally {
 			DB.closeStatement(st);
-			DB.closeConnection();
+			DB.getConnection();
 		}
+
 	}
 
 }
