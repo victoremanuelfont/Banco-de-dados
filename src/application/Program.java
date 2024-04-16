@@ -2,7 +2,9 @@ package application;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -18,7 +20,8 @@ public class Program {
 		try {
 			conn = DB.getConnection();
 			st = conn.prepareStatement("INSERT INTO seller " + "(Name, Email, BirthDate, BaseSalary, DepartmentId)"
-					+ "VALUES " + "(?, ?, ?, ?, ?)"); // place holder: lugar onde vou acrescentar os valores depois
+					+ "VALUES " + "(?, ?, ?, ?, ?)", // place holder: lugar onde vou acrescentar os valores depois.
+					  Statement.RETURN_GENERATED_KEYS);
 
 			st.setString(1, "Miguel"); // substitui o primeiro '?' PELO NOME MIGUEL
 			st.setString(2, "Miguel@gmail.com");
@@ -29,7 +32,15 @@ public class Program {
 			int rowsAffected = st.executeUpdate(); // execute para uma operação que vai ser alterado os dados
 													// O resultado é um numero inteiro indicando quantas linhas foram
 													// alteradas no banco de dados.
-			System.out.println("Linhas alteradas: " + rowsAffected);
+			if(rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				while(rs.next()) {
+					int id = rs.getInt(1); // indicando que quer o valor da primeira coluna
+					System.out.println("Id = " + id);
+				}
+			}else {
+				System.out.println("Sem linhas alteradas");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (ParseException e) { // exceção para a data
